@@ -1,0 +1,20 @@
+# Caddy (https://caddyserver.com). Add this block to /etc/caddy/Caddyfile, replace the address with your own, then: sudo systemctl reload caddy
+# Caddy gets and renews the HTTPS certificate by itself once the domain points at this server.
+your-domain.com {
+    encode zstd gzip
+
+    # The API: everything under /api goes to the backend (path passed on untouched)
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8001 {
+            # the visitor's real address, set by us and not by the visitor (the backend's rate limits rely on it)
+            header_up X-Forwarded-For {remote_host}
+        }
+    }
+
+    # Everything else is the built website; unknown paths fall back to index.html for the app's own routing
+    handle {
+        root * /var/www/mofi/frontend
+        try_files {path} /index.html
+        file_server
+    }
+}

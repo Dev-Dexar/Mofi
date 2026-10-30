@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet" />
+    <meta name="theme-color" content="#0A0A0A" />
+    <title>MoFi Life</title>
+    <script>
+      // The theme is chosen before the first paint, so there is never a flash of the wrong one. Same rule as lib/theme.ts: the saved
+      // choice (light, dark, or system), else the device's own setting; the admin panel is always dark.
+      ;(function () {
+        try {
+          var pref = localStorage.getItem('mofi_theme')
+          var light = pref === 'light' || ((pref !== 'dark') && window.matchMedia('(prefers-color-scheme: light)').matches)
+          if (location.pathname.indexOf('/admin') === 0) light = false
+          var d = document.documentElement
+          d.setAttribute('data-theme', light ? 'light' : 'dark')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', light ? '#F3F5F8' : '#0A0A0A')
+        } catch (e) {}
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

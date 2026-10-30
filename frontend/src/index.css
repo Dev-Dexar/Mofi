@@ -1,0 +1,373 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #0A0A0A;
+  --color-surface: #111318;
+  --color-primary: #10B981;
+  --color-accent2: #D4AF37;
+  --color-text: #F8FAFC;
+  --color-muted: #94A3B8;
+  --color-danger: #EF4444;
+  /* The colour of a hairline, a hover or a soft fill on any surface: white on the dark theme, near-black on the light one. Everything that
+     used to say "white at 10%" says "ink at 10%", so it reads as a light tint on dark and a dark tint on light. */
+  --color-ink: #FFFFFF;
+  /* Surface levels: a control or toast raised off a card, a menu or tooltip over the page, the darkest tiles, the sign-in panel */
+  --color-raised: #1D2027;
+  --color-popover: #1B1E26;
+  --color-deep: #080A0D;
+  --color-panel: #0D0D0D;
+  /* A recessed well inside a card (an amount box, a segmented control's track): darker than the card on the dark theme, a touch darker on the light one */
+  --color-well: rgba(0, 0, 0, 0.25);
+  --color-well-md: rgba(0, 0, 0, 0.3);
+  /* The colour of a drop shadow: black on the dark theme, a soft slate on the light one (a black shadow looks like a smudge on white) */
+  --color-shade: #000000;
+}
+
+/* The colour variables are registered as colours so that they can be animated (a plain custom property cannot): changing theme from a control
+   inside a window (lib/theme.ts, "fade") only has to let these move, and every colour built from them follows, in place, with no snapshot
+   of the page and no layers. */
+@property --color-base { syntax: '<color>'; inherits: true; initial-value: #0A0A0A; }
+@property --color-surface { syntax: '<color>'; inherits: true; initial-value: #111318; }
+@property --color-primary { syntax: '<color>'; inherits: true; initial-value: #10B981; }
+@property --color-accent2 { syntax: '<color>'; inherits: true; initial-value: #D4AF37; }
+@property --color-text { syntax: '<color>'; inherits: true; initial-value: #F8FAFC; }
+@property --color-muted { syntax: '<color>'; inherits: true; initial-value: #94A3B8; }
+@property --color-danger { syntax: '<color>'; inherits: true; initial-value: #EF4444; }
+@property --color-ink { syntax: '<color>'; inherits: true; initial-value: #FFFFFF; }
+@property --color-raised { syntax: '<color>'; inherits: true; initial-value: #1D2027; }
+@property --color-popover { syntax: '<color>'; inherits: true; initial-value: #1B1E26; }
+@property --color-deep { syntax: '<color>'; inherits: true; initial-value: #080A0D; }
+@property --color-panel { syntax: '<color>'; inherits: true; initial-value: #0D0D0D; }
+@property --color-well { syntax: '<color>'; inherits: true; initial-value: rgba(0, 0, 0, 0.25); }
+@property --color-well-md { syntax: '<color>'; inherits: true; initial-value: rgba(0, 0, 0, 0.3); }
+@property --color-shade { syntax: '<color>'; inherits: true; initial-value: #000000; }
+html.theme-fading { transition: --color-base 360ms ease, --color-surface 360ms ease, --color-primary 360ms ease, --color-accent2 360ms ease, --color-text 360ms ease, --color-muted 360ms ease, --color-danger 360ms ease, --color-ink 360ms ease, --color-raised 360ms ease, --color-popover 360ms ease, --color-deep 360ms ease, --color-panel 360ms ease, --color-well 360ms ease, --color-well-md 360ms ease, --color-shade 360ms ease; }
+@media (prefers-reduced-motion: reduce) { html.theme-fading { transition: none; } }
+
+/* The light theme. The dark one is the default above; the page picks one by putting data-theme on <html> (lib/theme.ts, and the script in
+   index.html so the very first paint is already the right one). Only the colours change: every size, spacing and animation is shared. */
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-base: #F3F5F8;
+  --color-surface: #FFFFFF;
+  --color-primary: #047857; /* darker green: it is the colour of text and buttons here, and the dark theme's green is too pale on white */
+  --color-accent2: #A16207;
+  --color-text: #0F172A;
+  --color-muted: #5A6478;
+  --color-danger: #DC2626;
+  --color-ink: #0F172A;
+  --color-raised: #E8ECF2;
+  --color-popover: #FFFFFF;
+  --color-deep: #E3E8EF;
+  --color-panel: #FFFFFF;
+  --color-well: rgba(15, 23, 42, 0.05);
+  --color-well-md: rgba(15, 23, 42, 0.06);
+  --color-shade: #64748B;
+  /* The pale shades of the palette are used for text and dots on the dark theme; on white they would be unreadable, so they take their deep cousins */
+  --color-rose-300: #BE123C;
+  --color-rose-400: #BE123C;
+  --color-emerald-300: #047857;
+  --color-emerald-400: #047857;
+  --color-amber-100: #92400E;
+  --color-amber-300: #B45309;
+  --color-amber-400: #B45309;
+  --color-teal-300: #0F766E;
+  --color-sky-400: #0369A1;
+  --color-violet-300: #6D28D9;
+  --color-purple-300: #7E22CE;
+}
+
+html {
+  background-color: var(--color-base);
+  overscroll-behavior-y: none;
+  /* The scrollbar gets its own strip, shown or not, so a page that gets taller or shorter (data arriving, a tab) can never shift the
+     content sideways by the scrollbar's width. The scrollbar still only draws itself when the page needs it. `both-edges` keeps a
+     matching strip on the left too, so centred content stays truly centred instead of sitting a few pixels to the left. */
+  scrollbar-gutter: stable both-edges;
+  scroll-padding-top: 6rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  @apply bg-base text-text antialiased;
+}
+
+/* Never let anything push the page sideways. `clip` (unlike `hidden`) keeps sticky/fixed elements working. */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Earnings digits: the new digit rolls up from below, the old one lifts out */
+@keyframes num-in {
+  from { opacity: 0; transform: translateY(75%); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes num-out {
+  from { opacity: 1; transform: translateY(0); filter: blur(0); }
+  to { opacity: 0; transform: translateY(-75%); filter: blur(2px); }
+}
+.num-in { animation: num-in 400ms cubic-bezier(0.22, 1, 0.36, 1); }
+.num-out { animation: num-out 280ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Page entrance: content comes into focus where it already sits. Blur and fade only, at an even pace */
+@keyframes focus-in {
+  from { opacity: 0; filter: blur(10px); }
+  to { opacity: 1; filter: blur(0); }
+}
+.focus-in { animation: focus-in 420ms linear both; }
+
+/* Page-to-page slide (app/PageTransition.tsx). Right-side pages (login) move fully on and off over
+   the top; the left-side page (landing) only shifts a quarter and dims underneath, like a stack of cards. */
+@keyframes slide-in-right { from { transform: translateX(100%); } }
+@keyframes slide-out-right { to { transform: translateX(100%); } }
+@keyframes slide-in-left { from { transform: translateX(-25%); opacity: 0.4; } }
+@keyframes slide-out-left { to { transform: translateX(-25%); opacity: 0.4; } }
+html:not(.navigating)::view-transition-new(.slide-from-right) { animation: none !important; }
+::view-transition-new(.slide-from-right) { animation: slide-in-right 420ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+html:not(.navigating)::view-transition-old(.slide-to-right) { animation: none !important; }
+::view-transition-old(.slide-to-right) { animation: slide-out-right 420ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+html:not(.navigating)::view-transition-new(.slide-from-left) { animation: none !important; }
+::view-transition-new(.slide-from-left) { animation: slide-in-left 420ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+html:not(.navigating)::view-transition-old(.slide-to-left) { animation: none !important; }
+::view-transition-old(.slide-to-left) { animation: slide-out-left 420ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+/* the right-side page is always the card on top */
+::view-transition-group(.slide-from-right),
+::view-transition-group(.slide-to-right) { z-index: 2; }
+/* Pages carry their own transition; the page as a whole should not also cross-fade */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; }
+
+/* Continuous marquee for rolling partners */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .num-in, .num-out, .focus-in { animation: none; }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none; }
+  .num-out { display: none; }
+  .animate-marquee { animation: none; }
+}
+
+/* Phone stats strip: hold a pair, roll up to the next, then loop (3rd row is a copy of the 1st) */
+@keyframes stat-roll {
+  0%, 42% { transform: translateY(0); }
+  50%, 92% { transform: translateY(-33.3333%); }
+  100% { transform: translateY(-66.6667%); }
+}
+.stat-roll { animation: stat-roll 7s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+
+/* Browser autofill paints inputs light blue/white; keep them the theme's own colour. The long transition stops Chrome's background from ever showing. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
+  box-shadow: 0 0 0 1000px var(--color-surface) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Toasts drop in from the top edge, and leave back up through it */
+@keyframes toast-in { from { opacity: 0; transform: translateY(-14px) scale(0.98); } }
+@keyframes toast-out { from { transform: translate(0, var(--dy, 0px)); opacity: var(--op, 1); } to { opacity: 0; transform: translate(0, -140%); } }
+.toast-in { animation: toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.toast-out { animation: toast-out 220ms cubic-bezier(0.55, 0, 1, 0.45) both; pointer-events: none; }
+/* On desktop they sit on the right: in from the right, out to the right */
+@keyframes toast-in-right { from { opacity: 0; transform: translateX(48px); } }
+@keyframes toast-out-right { from { transform: translate(0, var(--dy, 0px)); opacity: var(--op, 1); } to { opacity: 0; transform: translate(calc(100% + 2rem), var(--dy, 0px)); } }
+@media (min-width: 1024px) {
+  .toast-in { animation-name: toast-in-right; }
+  .toast-out { animation-name: toast-out-right; }
+}
+@media (prefers-reduced-motion: reduce) { .toast-in, .toast-out { animation: none; } .toast-out { opacity: 0; } }
+
+/* Genie windows: the real content fades in over the skeleton once the window has landed */
+@keyframes center-window-in { from { opacity: 0; transform: scale(0.88); } }
+@keyframes center-window-out { to { opacity: 0; transform: scale(0.88); } }
+@keyframes drawer-in { from { transform: translateX(calc(100% + 1.5rem)); } }
+@keyframes drawer-out { to { transform: translateX(calc(100% + 1.5rem)); } }
+@keyframes center-backdrop-in { from { opacity: 0; } }
+@keyframes center-backdrop-out { to { opacity: 0; } }
+.center-window-in { animation: center-window-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.center-window-out { animation: center-window-out 180ms cubic-bezier(0.4, 0, 1, 1) both; }
+.drawer-in { animation: drawer-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.drawer-out { animation: drawer-out 260ms cubic-bezier(0.55, 0, 1, 0.45) both; }
+.center-backdrop-in { animation: center-backdrop-in 260ms ease-out both; }
+.center-backdrop-out { animation: center-backdrop-out 180ms ease-in both; }
+/* Clip reveal (CenterWindow reveal="clip"): the window opens out of a small rounded box in the middle; it closes with a plain fade.
+   It ends with the clip pushed out past the window (negative inset) so the drop shadow is never cut off: removing the clip at the
+   last frame then changes nothing, which is what made the end of the animation look like it stalled. A little scale rides along. */
+@keyframes center-clip-in {
+  from { clip-path: inset(44% 36% 44% 36% round 16px); transform: scale(0.96); }
+  to { clip-path: inset(-140px -140px -140px -140px round 16px); transform: scale(1); }
+}
+/* closing is quieter than opening: a quick fade with a hint of shrink, no clip */
+@keyframes center-clip-out { to { opacity: 0; transform: scale(0.97); } }
+.center-clip-in { animation: center-clip-in 0.42s cubic-bezier(0.33, 1, 0.68, 1) backwards; }
+.center-clip-out { animation: center-clip-out 0.18s ease-in both; }
+@media (prefers-reduced-motion: reduce) { .center-window-in, .center-backdrop-in, .center-clip-in, .drawer-in { animation: none; } }
+@keyframes view-in { from { opacity: 0; filter: blur(8px); } }
+@keyframes view-out { to { opacity: 0; filter: blur(8px); } }
+.view-in { animation: view-in 340ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.view-out { animation: view-out 180ms ease-in both; }
+/* The profile's swaps: only the text, buttons and pictures fade and blur; the cards and panels around them stay put. Nested ones are skipped so nothing fades twice (a picture inside a span goes with the span: it used to fade and blur on its own as well, in a layer of its own that settled a hair off the text beside it). */
+.reveal-in :is(h1, h2, h3, p, label, button, input, img, canvas, svg, li, span:not(:has(span))):not(:is(button, p, h1, h2, h3, label, li) *):not(span svg, span img, span canvas):not(.animate-pulse) { animation: view-in 340ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.reveal-out :is(h1, h2, h3, p, label, button, input, img, canvas, svg, li, span:not(:has(span))):not(:is(button, p, h1, h2, h3, label, li) *):not(span svg, span img, span canvas):not(.animate-pulse) { animation: view-out 180ms ease-in both; }
+@media (prefers-reduced-motion: reduce) { .view-in, .view-out, .reveal-in *, .reveal-out * { animation: none !important; } }
+@keyframes lock-bump { 0% { transform: scale(1); } 35% { transform: scale(1.07); } 100% { transform: scale(1); } }
+.lock-bump { animation: lock-bump 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) { .lock-bump { animation: none; } }
+
+/* CRT glitch (components/brand/GlitchText.tsx). A 7s loop that sits still until 90%, then ~0.7s of jumps: the red and cyan
+   copies slide apart in sliced bands while the text itself twitches. steps(1) holds each frame until the next, so the browser
+   only repaints at the jumps. Scanlines on top give the pixel look and never move. */
+.glitch { position: relative; display: inline-block; }
+.glitch-main { display: inline-block; animation: glitch-main 7s steps(1, end) infinite; }
+.glitch-copy { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; opacity: 0; }
+.glitch-copy, .glitch-copy * { text-shadow: none !important; }
+.glitch-r, .glitch-r * { color: #ff2a55 !important; }
+.glitch-c, .glitch-c * { color: #00e5ff !important; }
+.glitch-mask { background: currentColor; mask-position: center; mask-size: contain; mask-repeat: no-repeat; }
+.glitch-r { animation: glitch-r 7s steps(1, end) infinite; }
+.glitch-c { animation: glitch-c 7s steps(1, end) infinite; }
+.glitch::after {
+  content: ''; position: absolute; inset: -2px 0; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.4) 0 1px, transparent 1px 3px);
+}
+@keyframes glitch-main {
+  0%, 90% { transform: none; opacity: 1; }
+  91% { transform: translateX(1px) skewX(-8deg); }
+  93% { transform: translateX(-2px); opacity: 0.85; }
+  95% { transform: translateX(1px) skewX(6deg); opacity: 1; }
+  97% { transform: translateX(-1px); }
+  99%, 100% { transform: none; }
+}
+@keyframes glitch-r {
+  0%, 89.9% { opacity: 0; transform: none; clip-path: inset(0); }
+  90% { opacity: 0.9; transform: translateX(-3px); clip-path: inset(8% 0 58% 0); }
+  92% { transform: translateX(3px); clip-path: inset(62% 0 6% 0); }
+  94% { transform: translateX(-2px); clip-path: inset(30% 0 38% 0); }
+  96% { transform: translateX(4px); clip-path: inset(0 0 72% 0); }
+  98% { transform: translateX(-1px); clip-path: inset(48% 0 18% 0); }
+  99.5%, 100% { opacity: 0; transform: none; clip-path: inset(0); }
+}
+@keyframes glitch-c {
+  0%, 89.9% { opacity: 0; transform: none; clip-path: inset(0); }
+  90% { opacity: 0.9; transform: translateX(3px); clip-path: inset(55% 0 12% 0); }
+  92% { transform: translateX(-3px); clip-path: inset(10% 0 64% 0); }
+  94% { transform: translateX(2px); clip-path: inset(70% 0 4% 0); }
+  96% { transform: translateX(-4px); clip-path: inset(26% 0 44% 0); }
+  98% { transform: translateX(2px); clip-path: inset(4% 0 66% 0); }
+  99.5%, 100% { opacity: 0; transform: none; clip-path: inset(0); }
+}
+@media (prefers-reduced-motion: reduce) { .glitch-main, .glitch-copy { animation: none; } }
+
+/* A thin grey scrollbar. (Chrome and Safari use the ::-webkit-scrollbar rules; Firefox the two standard properties, which are kept away from Chrome because setting them there turns the webkit styling off.) */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-button { display: none; }
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: color-mix(in srgb, var(--color-ink) 16%, transparent); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: color-mix(in srgb, var(--color-ink) 28%, transparent); }
+::-webkit-scrollbar-thumb:active { background-color: color-mix(in srgb, var(--color-ink) 38%, transparent); }
+/* The page's own scrollbar is the browser's native thin one (standard properties), NOT the ::-webkit-scrollbar styling above. On a Mac set to
+   "Automatically based on mouse or trackpad", the native scrollbar floats over the page and takes no room, but a ::-webkit-scrollbar one is
+   a real 8px bar and `scrollbar-gutter` does not reserve room for it, so the page shifted 8px whenever it appeared. Native ones can be held
+   steady: they take no room when they float, and `scrollbar-gutter` (above) reserves their room when they do not. Chrome ignores the
+   ::-webkit-scrollbar rules on an element that sets these; the scrolling areas inside the page keep the custom look. */
+html { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-ink) 20%, transparent) transparent; }
+
+
+/* Skeletons: a soft light sweeps across the placeholder; loaded content fades up when it replaces them */
+.sk {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-ink) 4.5%, transparent);
+}
+.sk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-ink) 7%, transparent), transparent);
+  animation: sk-sweep 1.6s ease-in-out infinite;
+}
+@keyframes sk-sweep {
+  to { transform: translateX(100%); }
+}
+.sk-fade { animation: sk-fade 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes sk-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk::after, .sk-fade { animation: none; }
+}
+
+/* Scrollable, but without a visible bar (used by the history table). */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* The card swaps the withdraw form for the "being sent" scene (features/wallet/components/WithdrawProgress.tsx): the scene rises in softly */
+@keyframes wd-in { from { opacity: 0; transform: translateY(8px); } }
+.wd-in { animation: wd-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) { .wd-in { animation: none; } }
+
+/* The phone's tab bar slides down out of sight while a card is full screen (PopCard sets data-focus on <html>), and back up after.
+   It is only moved, never unmounted, so it keeps its state and its jelly. */
+.dock { transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1); }
+html[data-focus] .dock { transform: translateY(calc(100% + 1.5rem)); }
+@media (prefers-reduced-motion: reduce) { .dock { transition: none; } }
+
+/* The payment's scrolling area in the Wallet card: it reaches the card's edges (the card's padding is 1rem, 1.5rem from 640px up) and
+   starts under the top row (2.5rem tall, 1rem below it), so the content scrolls behind the buttons in that row (they are frosted glass)
+   instead of being cut off short of it. Its corners follow the card's, so nothing pokes out. */
+.pay-scroll {
+  --pad: 1rem;
+  inset: calc(-1 * (var(--pad) + 2.5rem + 1rem)) calc(-1 * var(--pad)) calc(-1 * var(--pad)) calc(-1 * var(--pad));
+  padding: calc(var(--pad) + 2.5rem + 1rem + 0.5rem) var(--pad) var(--pad);
+  overflow-y: auto;
+  border-radius: 1.5rem;
+  scrollbar-width: none;
+}
+.pay-scroll::-webkit-scrollbar { display: none; }
+@media (min-width: 640px) { .pay-scroll { --pad: 1.5rem; } }
+
+/* the padlock settling after its shackle drops in (landing page, features) */
+@keyframes lock-thud { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(4px); } 65% { transform: translateY(-1px); } }
+.lock-thud { animation: lock-thud 420ms ease-out 1500ms both; }
+
+
+/* Switching theme: the new look spreads out from the button that was pressed, as a circle (the browser's View Transitions, lib/theme.ts).
+   Only while html.theme-switching is set, so it never touches the page-to-page slide above. Without View Transitions the theme just changes. */
+html.theme-switching::view-transition-old(root),
+html.theme-switching::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.theme-switching::view-transition-old(root) { z-index: 1; }
+html.theme-switching::view-transition-new(root) { z-index: 2; animation: theme-reveal 560ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--theme-x, 50%) var(--theme-y, 0)); }
+  to { clip-path: circle(var(--theme-r, 150vmax) at var(--theme-x, 50%) var(--theme-y, 0)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.theme-switching::view-transition-new(root) { animation: none; }
+}
+
+/* Artwork drawn in white for the dark theme (the 404 scribble): inverted on the light one */
+html[data-theme='light'] .invert-on-light { filter: invert(1); }
